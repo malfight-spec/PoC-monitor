@@ -24,6 +24,6 @@ jobs:
 
       - name: Run monitor
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_CUSTOM }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python exploit_collection.py
