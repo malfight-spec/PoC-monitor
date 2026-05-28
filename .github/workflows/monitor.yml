@@ -2,28 +2,28 @@ name: PoC Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
-
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
-  run-monitor:
+  run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install packages
+      - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Run monitor
+      - name: Run
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          NEWS_WEBHOOK_URL: ${{ secrets.NEWS_WEBHOOK_URL }}
+          KEV_WEBHOOK_URL: ${{ secrets.KEV_WEBHOOK_URL }}
         run: python exploit_collection.py
