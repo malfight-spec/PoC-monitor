@@ -2,8 +2,17 @@ name: PoC Monitor
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
+
+# 重複起動を防ぐ（seen.json のプッシュ競合を回避）
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+# seen.json をリポジトリへ書き戻すために write 権限が必要
+permissions:
+  contents: write
 
 jobs:
   run:
@@ -26,4 +35,19 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           NEWS_WEBHOOK_URL: ${{ secrets.NEWS_WEBHOOK_URL }}
           KEV_WEBHOOK_URL: ${{ secrets.KEV_WEBHOOK_URL }}
+          RUN_ONCE: "1"
         run: python exploit_collection.py
+
+      - name: Persist dedup state
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain seen.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add seen.json
+            git commit -m "chore: update dedup state (seen.json)"
+            git push origin "HEAD:${GITHUB_REF_NAME}" \
+              || (git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}")
+          else
+            echo "seen.json unchanged"
+          fi
