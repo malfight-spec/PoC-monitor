@@ -2,7 +2,8 @@ name: PoC Monitor
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # :00/:30 は混雑して間引かれやすいため、混まない時刻にずらす（毎時 :13 と :43）
+    - cron: "13,43 * * * *"
   workflow_dispatch:
 
 # 重複起動を防ぐ（seen.json のプッシュ競合を回避）
